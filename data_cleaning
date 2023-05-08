@@ -1,0 +1,165 @@
+-- Trim Trail and lead spaces for Start station Name
+UPDATE `bike_share_data.combine_data_clean`
+SET start_station_name = TRIM(start_station_name)
+WHERE start_station_name IS NOT NULL
+
+-- Trim Trail and lead spaces for Start station ID
+UPDATE `bike_share_data.combine_data_clean`
+SET start_station_id = TRIM(start_station_id)
+WHERE start_station_id IS NOT NULL
+
+-- Trim Trail and lead spaces for End Station Name
+UPDATE `bike_share_data.combine_data_clean`
+SET end_station_name = TRIM(end_station_name)
+WHERE end_station_name IS NOT NULL
+
+-- Trim Trail and lead spaces for End station ID
+UPDATE `bike_share_data.combine_data_clean`
+SET end_station_id = TRIM(end_station_id)
+WHERE end_station_id IS NOT NULL
+
+-- Updating Start_station_name for all bikes (only electric)
+UPDATE `bike_share_data.combine_data_clean`
+SET start_station_name = "No Docking Station"
+WHERE start_station_name IS NULL
+
+-- Updating Start_station_id for all bikes (only electric)
+UPDATE `bike_share_data.combine_data_clean`
+SET start_station_id = "No Docking Station"
+WHERE start_station_id IS NULL
+
+-- Updating End Station Name NUlls for remaining electric bikes
+UPDATE `bike_share_data.combine_data_clean`
+SET end_station_name = "No Docking Station"
+WHERE end_station_name IS NULL
+AND rideable_type = "electric_bike"
+-- modified the 896,494 rows of electric bike nulls
+
+-- Removing Null End Station Name for Classic Bikes
+DELETE FROM `bike_share_data.combine_data_clean`
+WHERE rideable_type != "electric_bike"
+AND end_station_name IS NULL
+-- Got rid of 248 rows
+
+--Updating End Station ID NUlls for remaining electric bikes
+UPDATE `bike_share_data.combine_data_clean`
+SET end_station_id = "No Docking Station"
+WHERE end_station_id IS NULL
+AND rideable_type = "electric_bike"
+-- modified the 896,494 rows of electric bike nulls
+
+-- Deleting rows where end lat/lng are NULL (none of the start lat/lng were NULL)
+DELETE FROM `bike_share_data.combine_data_clean`
+WHERE end_lat IS NULL
+OR end_lng IS NULL
+-- Got rid of 5,899 rows
+
+-- Check for any remaining null values
+SELECT * FROM `bike_share_data.combine_data_clean`
+WHERE ride_id IS NULL
+OR rideable_type IS NULL
+OR started_at IS NULL
+OR ended_at IS NULL
+OR ride_length IS NULL
+OR day_of_week IS NULL
+OR start_station_name IS NULL
+OR start_station_id IS NULL
+OR end_station_name IS NULL
+OR end_station_id IS NULL
+OR start_lat IS NULL
+OR start_lng IS NULL
+OR end_lat IS NULL
+OR end_lng IS NULL
+OR member_casual IS NULL
+-- No more null values left
+
+--Removing trips that are shorter than one minute or longer than 10hrs (workday + commute) 
+DELETE FROM `bike_share_data.combine_data_clean`
+WHERE ride_length = "00:00:00"
+OR ride_length > "10:00:00"
+-- Removed 76,222 rows
+
+-- Adding day of week names -- Sunday = 1, Tuesday = 2... etc
+UPDATE `bike_share_data.combine_data_clean`
+SET day_of_week = "Sunday"
+WHERE day_of_week_num = 1;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET day_of_week = "Monday"
+WHERE day_of_week_num = 2;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET day_of_week = "Tuesday"
+WHERE day_of_week_num = 3;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET day_of_week = "Wednesday"
+WHERE day_of_week_num = 4;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET day_of_week = "Thursday"
+WHERE day_of_week_num = 5;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET day_of_week = "Friday"
+WHERE day_of_week_num = 6;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET day_of_week = "Saturday"
+WHERE day_of_week_num = 7;
+-- Day of week updated
+
+-- Added column month_num and extracted the number of month for each ride
+UPDATE `bike_share_data.combine_data_clean`
+SET month_num = EXTRACT(MONTH FROM (started_at)) 
+WHERE month_num IS NULL
+
+-- Adding month names for each number
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "January"
+WHERE month_num = 1;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "February"
+WHERE month_num = 2;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "March"
+WHERE month_num = 3;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "April"
+WHERE month_num = 4;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "May"
+WHERE month_num = 5;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "June"
+WHERE month_num = 6;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "July"
+WHERE month_num = 7;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "August"
+WHERE month_num = 8;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "September"
+WHERE month_num = 9;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "October"
+WHERE month_num = 10;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "November"
+WHERE month_num = 11;
+
+UPDATE `bike_share_data.combine_data_clean`
+SET month = "December"
+WHERE month_num = 12;
+-- Month name updated
