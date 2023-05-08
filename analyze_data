@@ -1,0 +1,104 @@
+-- AVG time for ride by member status
+SELECT DISTINCT member_casual, AVG(ended_at-started_at) AS ride_length
+FROM `bike_share_data.combine_data_clean`
+GROUP BY member_casual
+
+-- Number of rides per day of week total - 
+SELECT DISTINCT day_of_week, COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+GROUP BY day_of_week
+
+-- Number of rides per day of week total - by member type
+SELECT DISTINCT day_of_week, member_casual, COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+GROUP BY day_of_week, member_casual
+
+-- Number of rides broken out by start station name and lat 
+SELECT DISTINCT start_station_name, ROUND(start_lat,3) AS start_lat , ROUND(start_lng,3) AS start_lng, 
+COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+GROUP BY start_station_name, start_lat, start_lng
+
+-- Number of rides broken out by end station name and lat 
+SELECT DISTINCT end_station_name, ROUND(end_lat,3) AS end_lat, ROUND(end_lng,3) AS end_lng,
+COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+GROUP BY end_station_name, end_lat, end_lng
+
+--Number of rides per bike by member status
+SELECT DISTINCT rideable_type, member_casual, COUNT(member_casual) AS num_of_rides
+FROM `bike_share_data.combine_data_clean`
+GROUP BY rideable_type, member_casual
+
+-- Number of rides per month (total)
+SELECT DISTINCT month, month_num,COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+GROUP BY month, month_num
+ORDER BY month_num ASC
+
+-- Number of rides per month by member type
+SELECT DISTINCT month, month_num, member_casual ,COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+GROUP BY month, month_num, member_casual
+ORDER BY month_num ASC
+
+-- top 15 start station locations for all riders
+SELECT DISTINCT start_station_name, AVG(start_lat) AS lat, AVG(start_lng) AS lng,
+COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+GROUP BY start_station_name
+HAVING start_station_name != "No Docking Station"
+ORDER BY num_rides DESC
+LIMIT 15
+
+-- top 10 start station locations for members
+SELECT DISTINCT start_station_name, AVG(start_lat) AS lat, AVG (start_lng) AS lng,
+COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+WHERE member_casual = "member"
+GROUP BY start_station_name
+HAVING start_station_name != "No Docking Station" 
+ORDER BY num_rides DESC
+LIMIT 10
+
+-- top 10 start station locations for casual riders
+SELECT DISTINCT start_station_name, AVG(start_lat) AS lat, AVG(start_lng) AS lng,
+COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+WHERE member_casual = "casual"
+GROUP BY start_station_name
+HAVING start_station_name != "No Docking Station" 
+ORDER BY num_rides DESC
+LIMIT 10
+
+--Number of rides for each hour of the day (by member type)
+SELECT CASE
+  WHEN EXTRACT(hour FROM started_at) >= 23 THEN "11pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 22 AND 23 THEN "10pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 21 AND 22 THEN "9pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 20 AND 21 THEN "8pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 19 AND 20 THEN "7pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 18 AND 19 THEN "6pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 17 AND 18 THEN "5pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 16 AND 17 THEN "4pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 15 AND 16 THEN "3pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 14 AND 15 THEN "2pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 13 AND 14 THEN "1pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 12 AND 13 THEN "12pm"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 11 AND 12 THEN "11am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 10 AND 11 THEN "10am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 9 AND 10 THEN "9am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 8 AND 9 THEN "8am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 7 AND 8 THEN "7am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 6 AND 7 THEN "6am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 5 AND 6 THEN "5am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 4 AND 5 THEN "4am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 3 AND 4 THEN "3am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 2 AND 3 THEN "2am"
+  WHEN EXTRACT(hour FROM started_at) BETWEEN 1 AND 2 THEN "1am"
+  WHEN EXTRACT(hour FROM started_at) <1 THEN "12am"
+END AS time_of_day,
+member_casual, COUNT(member_casual) AS num_rides
+FROM `bike_share_data.combine_data_clean`
+GROUP BY time_of_day, member_casual
+ORDER BY time_of_day DESC
