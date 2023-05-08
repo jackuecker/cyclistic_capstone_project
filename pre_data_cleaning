@@ -1,0 +1,100 @@
+-- MERGE TABLES TOGETHER CREATING TABLE COMBINE_DATA
+CREATE TABLE bike_share_data.combine_data AS
+SELECT *
+FROM
+(SELECT *
+FROM `bike_share_data.trip_data_02_2022`
+UNION ALL
+SELECT *
+FROM `bike_share_data.trip_data_03_2022`
+UNION ALL
+SELECT *
+FROM `bike_share_data.trip_data_04_2022`
+UNION ALL
+SELECT *
+FROM `bike_share_data.trip_data_05_2022`
+UNION ALL
+SELECT * 
+FROM `bike_share_data.trip_data_06_2022`
+UNION ALL
+SELECT *
+FROM `bike_share_data.trip_data_07_2022`
+UNION ALL
+SELECT *
+FROM `bike_share_data.trip_data_08_2022`
+UNION ALL
+SELECT * 
+FROM `bike_share_data.trip_data_09_2022`
+UNION ALL
+SELECT *
+FROM `bike_share_data.trip_data_10_2022`
+UNION ALL
+SELECT *
+FROM `bike_share_data.trip_data_11_2022`
+UNION ALL
+SELECT * 
+FROM `bike_share_data.trip_data_12_2022`
+UNION ALL
+SELECT *
+FROM `bike_share_data.trip_data_01_2023`
+)
+
+-- Checking Null Start Station names
+SELECT DISTINCT rideable_type, COUNT(*), start_station_name
+FROM `bike_share_data.combine_data`
+GROUP BY rideable_type, start_station_name
+HAVING start_station_name IS NULL
+-- ONLY null for electric bikes (~900k) as they may be used outside of the stations. Will replace null for electric bikes to no_docking_station
+
+-- Checking Null START Station ID
+SELECT DISTINCT rideable_type, COUNT(*), start_station_id
+FROM `bike_share_data.combine_data`
+GROUP BY rideable_type, start_station_id
+HAVING start_station_id IS NULL
+-- ONLY NULL for electric bikes as they are able to be used outside of docking stations, will remove all others and replace electric start station ID
+
+-- Checking Null END Station names
+SELECT DISTINCT rideable_type, COUNT(*), end_station_name
+FROM `bike_share_data.combine_data`
+GROUP BY rideable_type, end_station_name
+HAVING end_station_name IS NULL
+-- Mainly NULL for electric (same reason as start_station_name), will remove all others and replace electric end station name
+
+-- Checking Null END Station ID
+SELECT DISTINCT rideable_type, COUNT(*), end_station_id
+FROM `bike_share_data.combine_data`
+GROUP BY rideable_type, end_station_id
+HAVING end_station_id IS NULL
+-- Mainly NULL for electric (same reason as start_station_name), will remove all others and replace electric end station ID
+
+-- Checking nulls in start lat / long
+SELECT ride_id, start_lat, start_lng
+FROM `bike_share_data.combine_data`
+WHERE start_lat IS NULL
+OR start_lng IS NULL
+-- NO Starting Lat / lng are null
+
+-- Checking nulls in end lat / long
+SELECT ride_id, end_lat, end_lng
+FROM `bike_share_data.combine_data`
+WHERE end_lat IS NULL
+OR end_lng IS NULL
+-- 5899 instances where either one is null - must remove
+
+-- Checking Rideable Type
+SELECT DISTINCT rideable_type, COUNT(*) AS num_rides
+FROM `bike_share_data.combine_data`
+GROUP BY rideable_type
+-- electric = 2.9 million, classic = 2.6 million, docked = 178k
+
+--Checking Ride Length
+SELECT DISTINCT COUNT(ride_length)
+FROM `bike_share_data.combine_data`
+WHERE ride_length < "00:01:00" OR ride_length > "10:00:00"
+-- Need to remove all of the trips that are less than (accident or maintinence) one minute or greater than 10 hrs (workday+commute)
+
+-- Checking members vs casual riders
+SELECT DISTINCT member_casual, COUNT(*)
+FROM `bike_share_data.combine_data`
+GROUP BY member_casual
+-- No NULL's - more members than casual riders
